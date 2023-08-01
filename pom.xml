@@ -6,6 +6,7 @@
 	<packaging>pom</packaging>
 	<modules>
 		<module>Assembler</module>
+		<module>VMTranslator</module>
 	</modules>
 	<properties>
 		<java.version>17</java.version>
