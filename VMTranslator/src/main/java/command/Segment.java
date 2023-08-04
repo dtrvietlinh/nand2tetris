@@ -42,7 +42,8 @@ public class Segment {
 	
 	public String s_static(String i, String filename, int num) {
 		StringBuilder strb = new StringBuilder();
-		filename = filename.replace(".vm", "."+i);
+		String[] name = filename.split("/");
+		filename = name[name.length-1].replace(".vm", "."+i);
 		strb.append("@"+filename+"\n");
 		strb.append(pushOrPopSP(num));
 		return strb.toString();

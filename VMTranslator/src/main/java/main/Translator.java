@@ -3,8 +3,8 @@ package main;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-
 
 public class Translator {
 	
@@ -25,22 +25,27 @@ public class Translator {
 			return;
 		}
 		
-		String output = input.replace(".vn", ".asm");
+		String output = input.replace(".vm", ".asm");
 		Parser parser = new Parser();
-	
 		try {
 			br = new BufferedReader(new FileReader(input));
-			
+			bw = new BufferedWriter(new FileWriter(output));
 			String line;
 			while ((line=br.readLine()) != null) {
 				String newLine = parser.parse(line, input);
+
 				if (newLine==null) continue;
-				System.out.println("// "+line);
-				System.out.println(newLine);
+//				System.out.println("// "+line);
+//				System.out.println(newLine);
+				bw.write("// "+line);
+				bw.newLine();
+				bw.write(newLine);
+				bw.newLine();
 			}
+			
+			bw.close();
 		} catch (IOException e) {
-			// TODO: handle exception
-		}
+			System.err.println("Error reading file: " + e.getMessage());		}
 	}
 
 }

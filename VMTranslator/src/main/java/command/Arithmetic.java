@@ -9,7 +9,7 @@ public class Arithmetic {
 			rs+="M=D+M";
 			break;
 		case "sub":
-			rs+="M=D-M";
+			rs+="M=M-D";
 			break;
 		case "neg":
 			rs="@SP\n" + "A=M-1\n" + "M=-M";
