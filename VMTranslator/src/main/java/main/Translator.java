@@ -37,6 +37,7 @@ public class Translator {
 				if (newLine==null) continue;
 //				System.out.println("// "+line);
 //				System.out.println(newLine);
+				
 				bw.write("// "+line);
 				bw.newLine();
 				bw.write(newLine);
