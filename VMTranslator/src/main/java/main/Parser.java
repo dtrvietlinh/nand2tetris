@@ -1,5 +1,7 @@
 package main;
 
+import java.io.File;
+
 import command.Arithmetic;
 import command.Memory;
 
@@ -17,7 +19,7 @@ public class Parser {
 		lines=-1;
 	}
 
-	String parse(String line, String filename) {
+	String parse(String line, File file) {
 		if (line.isBlank())
 			return null;
 
@@ -31,21 +33,21 @@ public class Parser {
 		line=line.strip();
 		String[] args = line.split(" ");
 		String command = cmdTab.commandType(args[0]);
-		line = whichCommand(command, args, filename, lines);
+		line = whichCommand(command, args, file, lines);
 		String[] arr = line.split("\n");
 		this.lines+=arr.length;
 		
 		return line;
 	}
 
-	private String whichCommand(String command, String[] args, String filename, int lines) {
+	private String whichCommand(String command, String[] args, File file, int lines) {
 		String rs="";
 		switch (command) {
 		case "C_PUSH":
-			rs=memory.push(args, filename);
+			rs=memory.push(args, file);
 			break;
 		case "C_POP":
-			rs=memory.pop(args, filename);
+			rs=memory.pop(args, file);
 			break;
 		case "C_ARITHMETIC":
 			rs=arithmetic.doMath(args[0], lines);

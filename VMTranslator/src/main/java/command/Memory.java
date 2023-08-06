@@ -1,5 +1,7 @@
 package command;
 
+import java.io.File;
+
 public class Memory {
 	private Segment segment;
 	
@@ -7,9 +9,9 @@ public class Memory {
 		segment = new Segment();
 	}
 	
-	public String push(String[] args, String filename) {
+	public String push(String[] args, File file) {
 		StringBuilder strb = new StringBuilder();
-		String addr = threeSegments(args[1], args[2], filename, 1);
+		String addr = threeSegments(args[1], args[2], file, 1);
 		if (addr==null) 
 			addr = fourSegments(args[1], args[2], 1);
 		
@@ -19,13 +21,13 @@ public class Memory {
 		return strb.toString();
 	}
 	
-	public String pop(String[] args, String filename) {
+	public String pop(String[] args, File file) {
 		StringBuilder strb = new StringBuilder();		
 		String segm = args[1];
 		
 		if (segm.equals("static") || segm.equals("pointer") || segm.equals("temp")) {
 			strb.append("@SP\nAM=M-1\nD=M\n");
-			strb.append(threeSegments(segm, args[2], filename, 0));
+			strb.append(threeSegments(segm, args[2], file, 0));
 		} else {
 			strb.append(fourSegments(args[1], args[2], 0));
 			strb.append("\n");
@@ -35,7 +37,7 @@ public class Memory {
 		return strb.toString();
 	}
 	
-	private String threeSegments(String segm, String i, String filename, int num) {
+	private String threeSegments(String segm, String i, File file, int num) {
 		String rs=null;
 		switch (segm) {
 		case "temp":
@@ -45,7 +47,7 @@ public class Memory {
 			rs=segment.pointer(i, num);
 			break;
 		case "static":
-			rs=segment.s_static(i, filename, num);
+			rs=segment.s_static(i, file, num);
 			break;
 		}
 		return rs;

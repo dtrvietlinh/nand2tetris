@@ -1,5 +1,7 @@
 package command;
 
+import java.io.File;
+
 public class Segment {
 	public String fourSegments(String segment, String i, int num) {
 		StringBuilder strb = new StringBuilder();
@@ -40,10 +42,13 @@ public class Segment {
 		return "@"+i+"\nD=A";
 	}
 	
-	public String s_static(String i, String filename, int num) {
+	public String s_static(String i, File file, int num) {
 		StringBuilder strb = new StringBuilder();
+		
+		String filename = file.getName();
 		String[] name = filename.split("/");
 		filename = name[name.length-1].replace(".vm", "."+i);
+		
 		strb.append("@"+filename+"\n");
 		strb.append(pushOrPopSP(num));
 		return strb.toString();
