@@ -3,6 +3,7 @@ package main;
 import java.io.File;
 
 import command.Arithmetic;
+import command.Branching;
 import command.Memory;
 
 public class Parser {
@@ -10,12 +11,14 @@ public class Parser {
 	private CommandTable cmdTab;
 	private Memory memory;
 	private Arithmetic arithmetic;
+	private Branching branching;
 	private int lines;
 	
 	Parser() {
 		cmdTab = new CommandTable();
 		memory = new Memory();
 		arithmetic = new Arithmetic();
+		branching = new Branching();
 		lines=-1;
 	}
 
@@ -51,6 +54,9 @@ public class Parser {
 			break;
 		case "C_ARITHMETIC":
 			rs=arithmetic.doMath(args[0], lines);
+			break;
+		case "C_BRANCHING":
+			rs=branching.jump(args);
 			break;
 		}
 		return rs;

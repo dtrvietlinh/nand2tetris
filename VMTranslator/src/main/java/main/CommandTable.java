@@ -19,6 +19,9 @@ public class CommandTable {
 		map.put("and", "C_ARITHMETIC");
 		map.put("or", "C_ARITHMETIC");
 		map.put("not", "C_ARITHMETIC");
+		map.put("label", "C_BRANCHING");
+		map.put("if-goto", "C_BRANCHING");
+		map.put("goto", "C_BRANCHING");
 	}
 	
 	public String commandType(String command) {
