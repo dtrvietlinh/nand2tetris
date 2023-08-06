@@ -46,8 +46,7 @@ public class Segment {
 		StringBuilder strb = new StringBuilder();
 		
 		String filename = file.getName();
-		String[] name = filename.split("/");
-		filename = name[name.length-1].replace(".vm", "."+i);
+		filename = filename.replace(".vm", "."+i);
 		
 		strb.append("@"+filename+"\n");
 		strb.append(pushOrPopSP(num));
