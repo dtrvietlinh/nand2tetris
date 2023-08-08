@@ -1,11 +1,13 @@
 package command;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Arithmetic {
 	
-	private final int condNum1 = 13;
-	private final int condNum2 = 3;
+	private static Map<String, Integer> map = new HashMap<>();
 	
-	public String doMath(String command, int lines) {
+	public String doMath(String command) {
 		String rs = "@SP\n" + "AM=M-1\n" + "D=M\n" + "A=A-1\n";
 		switch (command) {
 		case "add":
@@ -27,16 +29,25 @@ public class Arithmetic {
 			rs="@SP\n" + "A=M-1\n" + "M=!M";
 			break;
 		default:
-			rs+=compare(command, lines);
+			rs+=compare(command);
 		}
 		return rs;
 	}
 	
-	private String compare(String command, int lines) {	
-		int line1 = lines+condNum1;
-		int line2 = line1+condNum2;
-		String jmpT = "@"+line1+"\n";
-		String jmpF = "@"+line2+"\n";
+	private String compare(String command) {
+		
+		Integer num = map.get(command);
+		String line1="";
+		String line2="";
+		if (num==null) {
+			line1 = "T."+command.toUpperCase();
+			line2 = "F."+command.toUpperCase();
+			map.put(command, 1);
+		} else {
+			line1 = "T."+command.toUpperCase()+num;
+			line2 = "F."+command.toUpperCase()+num;
+			map.put(command, num+1);
+		}
 		String cond = "";
 		
 		switch (command) {
@@ -53,10 +64,16 @@ public class Arithmetic {
 		
 		StringBuilder strb = new StringBuilder();
 		strb.append("D=M-D\n");
-		strb.append(jmpT+cond);
+		// true jump condition
+		strb.append("@"+line1+"\n"+cond);
 		strb.append("@SP\nA=M-1\nM=0\n");
-		strb.append(jmpF);
-		strb.append("0;JMP\n@SP\nA=M-1\nM=-1");
+		// false jump 
+		strb.append("@"+line2+"\n0;JMP\n");
+		// true jump addr
+		strb.append("("+line1+")\n");
+		strb.append("@SP\nA=M-1\nM=-1\n");
+		// false jump addr
+		strb.append("("+line2+")");
 
 		return strb.toString();
 	}
