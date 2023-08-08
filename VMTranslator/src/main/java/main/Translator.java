@@ -37,6 +37,7 @@ public class Translator {
 		String output = path.replace(files[0].getName(), dir.getName()).concat(".asm");
 		Writer writer = new Writer(output);
 
+		writer.writeInit();
 		for (File file : files) {
 			if (file.isFile() && file.getName().endsWith(".vm")) {
 				processFile(file, writer);

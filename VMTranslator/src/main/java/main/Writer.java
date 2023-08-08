@@ -12,9 +12,11 @@ class Writer {
 	private BufferedReader br;
 	private BufferedWriter bw;
 	private File input;
+	private Parser parser;
 	
 	Writer(String output) {
 		try {
+			parser = new Parser();
 			bw = new BufferedWriter(new FileWriter(output));
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -26,12 +28,8 @@ class Writer {
 			System.err.println("Input file must have .vm extension");
 			return;
 		}
-		
-		Parser parser = new Parser();
-
+	
 		try {
-			bw.write(parser.sysInit());
-			bw.newLine();
 			String line;
 			while ((line = br.readLine()) != null) {
 				String newLine = parser.parse(line, input);
@@ -46,6 +44,15 @@ class Writer {
 			System.out.println("Processed: " + input.getName());
 		} catch (IOException e) {
 			System.err.println("Error reading/writing file: " + e.getMessage());
+		}
+	}
+	
+	void writeInit() {
+		try {
+			bw.write(parser.sysInit());
+			bw.newLine();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 	

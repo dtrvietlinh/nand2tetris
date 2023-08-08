@@ -96,24 +96,24 @@ public class Function {
 		// endFrame = LCL
 		strb.append("@LCL\nD=M\n@"+endFrame+"\nM=D\n");
 		// retAddr = *(endFrame - 5)
-		strb.append(restore("R14", "5", endFrame));
+		strb.append(String.format("@5\nD=A\n@%s\nAM=M-D\nD=M\n@R14\nM=D\n",endFrame));
 		// ARG = pop()
 		strb.append(memory.pop("argument", "0", null)+"\n");
 		// SP = ARG + 1
 		strb.append("D=A+1\n@SP\nM=D\n");
 		// restore THIS, THAT, LCL, ARG
-		strb.append(restore("THAT", "1", endFrame));
-		strb.append(restore("THIS", "2", endFrame));
-		strb.append(restore("ARG", "3", endFrame));
-		strb.append(restore("LCL", "4", endFrame));
+		strb.append(restore("LCL", endFrame));
+		strb.append(restore("ARG", endFrame));
+		strb.append(restore("THIS", endFrame));
+		strb.append(restore("THAT", endFrame));
 		// goto retAddr
 		strb.append("@R14\nA=M\n0;JMP");
 		
 		return strb.toString();
 	}
 	
-	private String restore(String segm, String i, String endFrame) {
-		return String.format("@%s\nD=A\n@%s\nA=M-D\nD=M\n@%s\nM=D\n", i, endFrame, segm);
+	private String restore(String segm, String endFrame) {
+		return String.format("@%s\nAM=M+1\nD=M\n@%s\nM=D\n", endFrame, segm);
 	}
 	
 	private Integer check(String name) {
