@@ -9,11 +9,11 @@ public class Memory {
 		segment = new Segment();
 	}
 	
-	public String push(String[] args, File file) {
+	public String push(String segm, String i, File file) {
 		StringBuilder strb = new StringBuilder();
-		String addr = threeSegments(args[1], args[2], file, 1);
+		String addr = threeSegments(segm, i, file, 1);
 		if (addr==null) 
-			addr = fourSegments(args[1], args[2], 1);
+			addr = fourSegments(segm, i, 1);
 		
 		strb.append(addr);
 		strb.append("\n");
@@ -21,15 +21,14 @@ public class Memory {
 		return strb.toString();
 	}
 	
-	public String pop(String[] args, File file) {
+	public String pop(String segm, String i, File file) {
 		StringBuilder strb = new StringBuilder();		
-		String segm = args[1];
 		
 		if (segm.equals("static") || segm.equals("pointer") || segm.equals("temp")) {
 			strb.append("@SP\nAM=M-1\nD=M\n");
-			strb.append(threeSegments(segm, args[2], file, 0));
+			strb.append(threeSegments(segm, i, file, 0));
 		} else {
-			strb.append(fourSegments(args[1], args[2], 0));
+			strb.append(fourSegments(segm, i, 0));
 			strb.append("\n");
 			strb.append("@SP\nAM=M-1\nD=M\n@R13\nA=M\nM=D");
 		}

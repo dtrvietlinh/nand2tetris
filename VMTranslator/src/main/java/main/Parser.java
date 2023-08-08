@@ -4,6 +4,7 @@ import java.io.File;
 
 import command.Arithmetic;
 import command.Branching;
+import command.Function;
 import command.Memory;
 
 public class Parser {
@@ -12,6 +13,7 @@ public class Parser {
 	private Memory memory;
 	private Arithmetic arithmetic;
 	private Branching branching;
+	private Function function;
 	private int lines;
 	
 	Parser() {
@@ -19,6 +21,7 @@ public class Parser {
 		memory = new Memory();
 		arithmetic = new Arithmetic();
 		branching = new Branching();
+		function = new Function();
 		lines=-1;
 	}
 
@@ -47,16 +50,19 @@ public class Parser {
 		String rs="";
 		switch (command) {
 		case "C_PUSH":
-			rs=memory.push(args, file);
+			rs=memory.push(args[1], args[2], file);
 			break;
 		case "C_POP":
-			rs=memory.pop(args, file);
+			rs=memory.pop(args[1], args[2], file);
 			break;
 		case "C_ARITHMETIC":
 			rs=arithmetic.doMath(args[0], lines);
 			break;
 		case "C_BRANCHING":
 			rs=branching.jump(args);
+			break;
+		case "C_FUNCTION":
+			rs=function.handle(args);
 			break;
 		}
 		return rs;

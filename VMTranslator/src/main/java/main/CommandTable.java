@@ -22,6 +22,10 @@ public class CommandTable {
 		map.put("label", "C_BRANCHING");
 		map.put("if-goto", "C_BRANCHING");
 		map.put("goto", "C_BRANCHING");
+		map.put("function", "C_FUNCTION");
+		map.put("call", "C_FUNCTION");
+		map.put("return", "C_FUNCTION");
+
 	}
 	
 	public String commandType(String command) {
