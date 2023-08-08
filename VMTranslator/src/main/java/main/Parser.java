@@ -14,7 +14,6 @@ public class Parser {
 	private Arithmetic arithmetic;
 	private Branching branching;
 	private Function function;
-	private int lines;
 	
 	Parser() {
 		cmdTab = new CommandTable();
@@ -22,7 +21,6 @@ public class Parser {
 		arithmetic = new Arithmetic();
 		branching = new Branching();
 		function = new Function();
-		lines=-1;
 	}
 
 	String parse(String line, File file) {
@@ -39,14 +37,20 @@ public class Parser {
 		line=line.strip();
 		String[] args = line.split(" ");
 		String command = cmdTab.commandType(args[0]);
-		line = whichCommand(command, args, file, lines);
-		String[] arr = line.split("\n");
-		this.lines+=arr.length;
+		line = whichCommand(command, args, file);
 		
 		return line;
 	}
+	
+	String sysInit() {
+		StringBuilder strb = new StringBuilder();
+		strb.append("@256\nD=A\n@SP\nM=D\n");
+		String[] args = {"call", "Sys.init", "0"};
+		strb.append(function.handle(args));
+		return strb.toString();
+	}
 
-	private String whichCommand(String command, String[] args, File file, int lines) {
+	private String whichCommand(String command, String[] args, File file) {
 		String rs="";
 		switch (command) {
 		case "C_PUSH":
@@ -56,7 +60,7 @@ public class Parser {
 			rs=memory.pop(args[1], args[2], file);
 			break;
 		case "C_ARITHMETIC":
-			rs=arithmetic.doMath(args[0], lines);
+			rs=arithmetic.doMath(args[0]);
 			break;
 		case "C_BRANCHING":
 			rs=branching.jump(args);
