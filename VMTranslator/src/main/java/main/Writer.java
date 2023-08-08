@@ -30,6 +30,8 @@ class Writer {
 		Parser parser = new Parser();
 
 		try {
+			bw.write(parser.sysInit());
+			bw.newLine();
 			String line;
 			while ((line = br.readLine()) != null) {
 				String newLine = parser.parse(line, input);
@@ -46,7 +48,6 @@ class Writer {
 			System.err.println("Error reading/writing file: " + e.getMessage());
 		}
 	}
-	
 	
 	void setBr(File input) {
 		try {
