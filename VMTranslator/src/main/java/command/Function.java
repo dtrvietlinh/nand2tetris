@@ -48,8 +48,12 @@ public class Function {
 		Integer check = check(name);
 		if (check==null) 
 			retAddr = name+"$ret."+i;
-		else
-			retAddr = name+"$ret."+i+"."+check;
+		else {
+			String addr = name+"$ret."+i;
+			retAddr = addr +"."+ check;
+			String label = addr+".REPEAT";
+			return String.format("@%s\nD=A\n@%s\n0;JMP\n(%s)", retAddr, label, retAddr);
+		}
 		strb.append(push(retAddr));
 		// push LCL, ARG, THIS, THAT
 		strb.append(push("LCL"));
@@ -66,7 +70,7 @@ public class Function {
 		strb.append("("+retAddr+")");
 		return strb.toString();
 	}
-	
+		
 	private String push(String segm) {
 		StringBuilder strb = new StringBuilder();
 		switch (segm) {
@@ -78,6 +82,8 @@ public class Function {
 			break;
 		default:
 			strb.append("@"+segm+"\nD=A\n");
+			String label = segm+".REPEAT";
+			strb.append(String.format("@%s\n(%s)\n", label, label));
 			break;
 		}
 		strb.append("@SP\nAM=M+1\nA=A-1\nM=D\n");
@@ -86,34 +92,33 @@ public class Function {
 	
 	private String ret() {
 		StringBuilder strb = new StringBuilder();
-		String name = "endFrame";
-		String endFrame="";
-		Integer check = check(name);
-		if (check==null)
-			endFrame = name;
+		if (map.get("return")==null)
+			map.put("return", 1);
 		else
-			endFrame = name+"."+check;
+			return "@RETURN\n0;JMP";
+		
+		strb.append("(RETURN)\n");
 		// endFrame = LCL
-		strb.append("@LCL\nD=M\n@"+endFrame+"\nM=D\n");
+		strb.append("@LCL\nD=M\n@endFrame\nM=D\n");
 		// retAddr = *(endFrame - 5)
-		strb.append(String.format("@5\nD=A\n@%s\nAM=M-D\nD=M\n@R14\nM=D\n",endFrame));
+		strb.append("@5\nD=A\n@endFrame\nAM=M-D\nD=M\n@R14\nM=D\n");
 		// ARG = pop()
 		strb.append(memory.pop("argument", "0", null)+"\n");
 		// SP = ARG + 1
 		strb.append("D=A+1\n@SP\nM=D\n");
 		// restore THIS, THAT, LCL, ARG
-		strb.append(restore("LCL", endFrame));
-		strb.append(restore("ARG", endFrame));
-		strb.append(restore("THIS", endFrame));
-		strb.append(restore("THAT", endFrame));
+		strb.append(restore("LCL"));
+		strb.append(restore("ARG"));
+		strb.append(restore("THIS"));
+		strb.append(restore("THAT"));
 		// goto retAddr
 		strb.append("@R14\nA=M\n0;JMP");
 		
 		return strb.toString();
 	}
 	
-	private String restore(String segm, String endFrame) {
-		return String.format("@%s\nAM=M+1\nD=M\n@%s\nM=D\n", endFrame, segm);
+	private String restore(String segm) {
+		return String.format("@endFrame\nAM=M+1\nD=M\n@%s\nM=D\n", segm);
 	}
 	
 	private Integer check(String name) {
