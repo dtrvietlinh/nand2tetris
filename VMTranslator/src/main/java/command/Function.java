@@ -80,6 +80,8 @@ public class Function {
 		case "THAT":
 			strb.append("@"+segm+"\nD=M\n");
 			break;
+		case "0":
+			strb.append("@0\nD=A\n");
 		default:
 			strb.append("@"+segm+"\nD=A\n");
 			String label = segm+".REPEAT";
