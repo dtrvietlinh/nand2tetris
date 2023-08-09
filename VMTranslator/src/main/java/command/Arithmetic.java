@@ -48,6 +48,7 @@ public class Arithmetic {
 			line2 = "F."+command.toUpperCase()+num;
 			map.put(command, num+1);
 		}
+
 		String cond = "";
 		
 		switch (command) {
