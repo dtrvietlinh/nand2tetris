@@ -37,7 +37,7 @@ public class Writer {
 				String newLine = tokenizer.parse(line);
 				if (newLine==null)
 					continue;
-				newLine.lines().forEach(s->list.add(s+"\n"));
+				newLine.lines().forEach(s->list.add(s));
 			}
 			bw.write(proStructure.compileClass(list));
 			bw.close();
