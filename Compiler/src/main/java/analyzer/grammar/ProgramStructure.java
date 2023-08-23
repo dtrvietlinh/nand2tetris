@@ -83,7 +83,7 @@ public class ProgramStructure {
 		boolean right = isValidType(type, "");
 
 		if (left && right) {
-			strb.append("<subroutineDec>\n".indent(classIndentation * 2));
+			strb.append("<subroutineDec>".indent(classIndentation * 2));
 
 			for (int i=index+2; index < i; index++)
 					strb.append(list.get(index).indent(classIndentation * 3));
@@ -101,7 +101,13 @@ public class ProgramStructure {
 			String close = list.get(index++);
 			if (checkIfPresent(close, XML.SYMBOL, ")"))
 				strb.append(close.indent(classIndentation * 3));
-			strb.append("</subroutineDec>\n".indent(classIndentation * 2));
+			
+			// compile subroutine  body
+			strb.append("<subroutineBody>".indent(classIndentation*3));
+			compileSubroutineBody(list, strb);
+			strb.append("</subroutineBody>".indent(classIndentation*3));
+			
+			strb.append("</subroutineDec>".indent(classIndentation * 2));
 
 		}
 	}
@@ -117,23 +123,49 @@ public class ProgramStructure {
 			handleVars(list, strb, null, 4);
 		}
 		String token = list.get(index);
+		// check if ')' is present
 		if (token.contains(")")) return;
 		else if (checkIfPresent(token, XML.SYMBOL, ",")) {
 			index++;
 			strb.append(token.indent(classIndentation*4));
 		}
-		// check if ')' is present
 		compileParameterList(list, strb);
 	}
 
-	private void compileSubroutineBody() {
-		compileVarDec();
+	private void compileSubroutineBody(List<String> list, StringBuilder strb) {
+		String open = list.get(index++);
+		if (checkIfPresent(open, XML.SYMBOL, "{"))
+			strb.append(open.indent(classIndentation*4));
+		
+		compileVarDec(list, strb);
 
 		statement.compileStatements();
+		
+		String close = list.get(index++);
+		if (checkIfPresent(close, XML.SYMBOL, "}"))
+			strb.append(close.indent(classIndentation*4));
 	}
 
-	private void compileVarDec() {
-
+	private void compileVarDec(List<String> list, StringBuilder strb) {
+		String token = list.get(index);
+		if (!token.contains("var")) return;
+		if (!checkIfPresent(token, XML.KEYWORD, "var"))
+			return;
+		strb.append("<varDec>".indent(classIndentation*5));
+		index++;
+		// append 'var'
+		strb.append(token.indent(classIndentation*6));
+		
+		// check and append variable type
+		String type = list.get(index++);
+		if (isValidType(type, null))
+			strb.append(type.indent(classIndentation*6));
+		else
+			System.err.println("Type must be 'int' or 'char' or 'boolean' or className");
+		handleVars(list, strb, "", 6);
+		strb.append("</varDec>".indent(classIndentation*5));
+		
+		compileVarDec(list, strb);
 	}
 
 	private boolean isValidType(String token, String rule) {
@@ -150,14 +182,14 @@ public class ProgramStructure {
 	}
 	
 
-	private int handleVars(List<String> list, StringBuilder strb, String rule, int num) {
+	private void handleVars(List<String> list, StringBuilder strb, String rule, int num) {
 		String s = list.get(index++);
 
 		if (s.indexOf(XML.IDENTIFIER) == 0) {
 			strb.append(s.indent(classIndentation * num));
 		} else {
 			System.err.println("Variable's name is expected");
-			return index;
+			return;
 		}
 
 		if (rule != null) {
@@ -166,16 +198,14 @@ public class ProgramStructure {
 				if (token.contains(",") || token.contains(";")) {
 					strb.append(token.indent(classIndentation * num));
 					if (token.contains(","))
-						return handleVars(list, strb, "", num);
+						handleVars(list, strb, "", num);
 					else
-						return index;
+						return;
 				} else
 					System.err.println("Only ',' or ';' is allowed");
 			else
 				System.err.println("',' or ';' is expected after variables");
 		}
-
-		return index;
 	}
 	
 	private boolean checkIfPresent(String token, String xml, String symbol) {
