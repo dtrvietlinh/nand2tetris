@@ -16,115 +16,114 @@ public class ProgramStructure {
 		StringBuilder strb = new StringBuilder();
 
 		strb.append("<class>\n");
-		String indentation = "".indent(classIndentation);
 		// check if class token is missing
 		String CLASS = list.get(index++);
-		if (CLASS.indexOf("<keyword>") == 0) {
-			if (CLASS.contains("class"))
-				strb.append(indentation + CLASS);
-			else
-				System.err.println("Class token expected");
-		} else {
-			System.err.println("Class token expected");
-		}
+		if (checkIfPresent(CLASS, XML.KEYWORD, "class"))
+			strb.append(CLASS.indent(classIndentation));
 
 		// check if className is missing
 		String className = list.get(index++);
-		if (className.indexOf("<identifier>") == 0)
-			strb.append(indentation + className.indent(classIndentation));
-		else
-			System.err.println("Syntax error: class name");
+		if (checkIfPresent(className, XML.IDENTIFIER, ""))
+			strb.append(className.indent(classIndentation));
 
 		// check if missing '{' symbol
 		String openSymbol = list.get(index++);
-		if (openSymbol.indexOf("<symbol>") == 0) {
-			if (openSymbol.contains("{"))
-				strb.append(indentation + openSymbol);
-			else
-				System.err.println("'{' is expected after class name");
-		} else {
-			System.err.println("'{' is expected after class name");
-		}
-		// compile class variables
-		strb.append(compileClassVarDec(list));
-
-		//compileSubroutineDec();
+		if (checkIfPresent(openSymbol, XML.SYMBOL, "{"))
+			strb.append(openSymbol.indent(classIndentation));
+		// compile class variables if has some
+		compileClassVarDec(list, strb);
+		// compile subroutine
+		compileSubroutineDec(list, strb);
 
 		strb.append("</class>\n");
 
 		return strb.toString();
 	}
 
-	private String compileClassVarDec(List<String> list) {
-		StringBuilder strb = new StringBuilder();
-		String indent1 = "".indent(classIndentation * 2);
-		String indent2 = "".indent(classIndentation * 3);
-		boolean hadClassVarDec = false;
-		strb.append(indent1 + "<classVarDec>\n");
+	// ('static'|'field') type varName (',' varName)* ';'
+	private void compileClassVarDec(List<String> list, StringBuilder strb) {
+		String s = list.get(index);
+		if (!s.contains("static") && !s.contains("field"))
+			return;
 
-		for (int i = index; i < list.size(); i++) {
-			String s = list.get(i);
-			String next = list.get(i + 1);
+		String type = list.get(index + 1);
+		boolean left = s.indexOf(XML.KEYWORD) == 0;
+		boolean right = isValidType(type, null);
 
-			boolean left = s.contains("static") || s.contains("field");
-			boolean right = isValidType(next);
-
-			if (left && right) {
-				hadClassVarDec = true;
-				for (int j = i; j < list.size(); j++) {
-					String t = list.get(j);
-					if (j < i + 2 || t.indexOf("<keyword>") == -1) {
-						list.set(j, null);
-						// here we go!
-						strb.append(indent2 + t);
-					} else
-						System.err.println("';' is expected");
-
-					if (t.contains(";"))
-						if (t.indexOf("<symbol>") == 0) {
-							i = j;
-							break;
-						} else
-							System.err.println("Syntax error on " + t + " token");
-				}
-			} else {
-				if (right)
-					System.err.println("Syntax error on " + s + " token");
-				if (left)
-					System.err.println("Variable's type is missing");
-			}
-
-		}
-
-		strb.append(indent1 + "</classVarDec>\n");
-
-		return hadClassVarDec ? strb.toString() : "";
-	}
-
-	private void compileSubroutineDec(List<String> list) {
-		StringBuilder strb = new StringBuilder();
-		strb.append("<subroutineDec>\n");
-
-		for (int i = index; i < list.size(); i++) {
-			String s = list.get(i);
-			if (s.contains("constructor") || s.contains("function") || s.contains("method")) {
-				if (s.indexOf("<keyword>") == 0) {
-
-				} else {
-					System.err.println("Syntax error: subroutineDec " + s);
+		if (left && right) {
+			strb.append("<classVarDec>\n".indent(classIndentation * 2));
+			// check if variable's type is valid
+			for (int i = index + 2; index < list.size(); index++) {
+				String t = list.get(index);
+				// append 'static' or 'field' and variable's type
+				if (index < i)
+					strb.append(t.indent(classIndentation * 3));
+				// append variables name
+				else {
+					handleVars(list, strb, "", 3);
+					break;
 				}
 			}
-
+			strb.append("</classVarDec>\n".indent(classIndentation * 2));
+		} else if (left) {
+			System.err.println("Type must be 'int' or 'char' or 'boolean' or className");
+		} else if (right) {
+			System.err.println("Syntax error on " + s + " token");
 		}
-		compileParameterList();
-
-		compileSubroutineBody();
-		strb.append("</subroutineDec>\n");
-
+		compileClassVarDec(list, strb);
 	}
 
-	private void compileParameterList() {
+	private void compileSubroutineDec(List<String> list, StringBuilder strb) {
+		String s = list.get(index);
+		if (!s.contains("constructor") && !s.contains("function") && !s.contains("method"))
+			return;
 
+		String type = list.get(index + 1);
+		boolean left = s.indexOf(XML.KEYWORD) == 0;
+		boolean right = isValidType(type, "");
+
+		if (left && right) {
+			strb.append("<subroutineDec>\n".indent(classIndentation * 2));
+
+			for (int i=index+2; index < i; index++)
+					strb.append(list.get(index).indent(classIndentation * 3));
+			// append subroutine name
+			handleVars(list, strb, null, 3);
+			// check if open parenthesis is present
+			String open = list.get(index++);
+			if (checkIfPresent(open, XML.SYMBOL, "("))
+				strb.append(open.indent(classIndentation * 3));
+			// compile parameter list
+			strb.append("<parameterList>".indent(classIndentation*3));
+			compileParameterList(list, strb);
+			strb.append("</parameterList>".indent(classIndentation*3));
+			// check if close parenthesis is present
+			String close = list.get(index++);
+			if (checkIfPresent(close, XML.SYMBOL, ")"))
+				strb.append(close.indent(classIndentation * 3));
+			strb.append("</subroutineDec>\n".indent(classIndentation * 2));
+
+		}
+	}
+
+	private void compileParameterList(List<String> list, StringBuilder strb) {
+		// check if type is valid
+		String type = list.get(index);
+		if (!isValidType(type, null)) return;
+		else {
+			index++;
+			strb.append(type.indent(classIndentation*4));
+			// append variable's name
+			handleVars(list, strb, null, 4);
+		}
+		String token = list.get(index);
+		if (token.contains(")")) return;
+		else if (checkIfPresent(token, XML.SYMBOL, ",")) {
+			index++;
+			strb.append(token.indent(classIndentation*4));
+		}
+		// check if ')' is present
+		compileParameterList(list, strb);
 	}
 
 	private void compileSubroutineBody() {
@@ -137,35 +136,57 @@ public class ProgramStructure {
 
 	}
 
-	private boolean isValidType(String token) {
+	private boolean isValidType(String token, String rule) {
 		boolean rs = false;
-		if (token.indexOf("<keyword>") == 0)
+		if (token.indexOf(XML.KEYWORD) == 0) {
 			if (token.contains("int") || token.contains("char") || token.contains("boolean"))
 				rs = true;
-			else
-				System.err.println("Type must be 'int' or 'char' or 'boolean' or className");
-		if (token.indexOf("<identifier>") == 0)
+			if (rule != null && token.contains("void"))
+				rs = true;
+		}
+		if (token.indexOf(XML.IDENTIFIER) == 0)
 			rs = true;
 		return rs;
 	}
+	
 
-	private void handleMultiVars(List<String> list, StringBuilder strb, int i) {
-		String s = list.get(i++);
-		if (s.indexOf("<identifier>")==0) {
-			strb.append(s);
+	private int handleVars(List<String> list, StringBuilder strb, String rule, int num) {
+		String s = list.get(index++);
+
+		if (s.indexOf(XML.IDENTIFIER) == 0) {
+			strb.append(s.indent(classIndentation * num));
 		} else {
 			System.err.println("Variable's name is expected");
-			return;
+			return index;
 		}
-		String token = list.get(i++);
-		if (token.indexOf("<symbol>")==0) {
-			if (token.contains(","))
-				handleMultiVars(list, strb, i);
-			else if (token.contains(";"))
-				return;
-		} else {
-			System.err.println("',' or ';' is expected after variables");
+
+		if (rule != null) {
+			String token = list.get(index++);
+			if (token.indexOf(XML.SYMBOL) == 0)
+				if (token.contains(",") || token.contains(";")) {
+					strb.append(token.indent(classIndentation * num));
+					if (token.contains(","))
+						return handleVars(list, strb, "", num);
+					else
+						return index;
+				} else
+					System.err.println("Only ',' or ';' is allowed");
+			else
+				System.err.println("',' or ';' is expected after variables");
 		}
-			
+
+		return index;
+	}
+	
+	private boolean checkIfPresent(String token, String xml, String symbol) {
+		boolean rs = false;
+		if (token.indexOf(xml)==0)
+			if (token.contains(symbol))
+				rs=true;
+			else 
+				System.err.println("Only '"+symbol+"' is allowed");
+		else
+			System.err.println("Syntax error on "+token+" token");
+		return rs;
 	}
 }
