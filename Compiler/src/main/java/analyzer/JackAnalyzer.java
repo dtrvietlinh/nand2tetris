@@ -33,6 +33,7 @@ public class JackAnalyzer {
 		
 		for (File file : files) {
 			if (file.isFile() && file.getName().endsWith(".jack")) {
+				System.out.println("Processed: "+file.getName());
 				String output = file.getPath().replace(".jack", ".xml");
 				Writer writer = new Writer(file, output);
 				writer.write();
