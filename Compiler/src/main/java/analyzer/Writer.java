@@ -39,7 +39,7 @@ public class Writer {
 					continue;
 				newLine.lines().forEach(s->list.add(s));
 			}
-			bw.write(proStructure.compileClass(list));
+			bw.write(proStructure.compile(list));
 			bw.close();
  		} catch (IOException e) {
 			System.err.println("Error reading/writing file: " + e.getMessage());
