@@ -1,5 +1,8 @@
 package compiler;
 
-public class JackCompiler {
+import compiler.table.SymbolTable;
 
+public class JackCompiler {
+	public static void main(String[] args) {
+	}
 }
